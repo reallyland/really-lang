@@ -76,6 +76,8 @@ The general purpose programming language you will ever need to learn and use. He
 
 ### Functions
 
+### Pattern Matching
+
 ### Modules
 
 1. Import
