@@ -7,14 +7,16 @@ The general purpose programming language you will ever need to learn and use. He
 ## Features
 
 1. No `Null`, use `Option` type for better error handling.
-2. Everything is immutable by default, use `mut` keyword for mutable variables.
-3. Statically typed programming language.
-4. Single threaded by default.
+2. No `class inheritance`.
+3. Everything is immutable by default, use `mut` keyword for mutable variables.
+4. Statically typed programming language.
+5. Single threaded by default.
 
 ## TO-DO
 
 1. To support compilation to Web Assembly.
 2. To support multithreading.
+4. To support Web APIs.
 
 ## Syntax
 
@@ -35,55 +37,69 @@ The general purpose programming language you will ever need to learn and use. He
 /** Type inferred */
 let typeInferred = '100'; /** string */
 
+
 /** Unknown type */
 let unknownType; /** unknown */
 unknownType = '100'; /** unknown -> str */
 
+
 /** Compile Error! Unknown type should be temporary. */
 let unknownType; /** unknown */
 
+
 /** Declaration with defined type */
 let definedType: str = '100';
+
+
+/** Similar to `do` in some other languages */
+let doVar: num = {
+  let a = 1;
+  let b = 2;
+  a + b
+};
+
+doVar == 3;
+
+
+/** Async `do` */
+let asyncDoVar: num = async {
+  let a = await 1;
+  let b = a * 2;
+  b
+};
+
+asyncDoVar == 2;
+
+
+/** Mutable variable */
+let mut mutableVar = '100';
+mutableVar = '2';
+
+
+/** Mutable variable is mutable by value, not by type */
+let mut mutableVar = '100'; /** str */
+mutableVar = 10; /** Compile error! */
+
+
+/** All variables are immutable by default */
+let immutableByDefault = '10'; /** immutable string */
+immutableByDefault = '1'; /** Compile error! */
+
+
+/** Referencing or borrowing */
+let val = '10';
+let borrowVal = &val; /** &str */
+let mut mutableBorrow = &mut val; /** &mut str */
+
+borrowVal = '1'; /** Compile error! */
+mutableBorrow = '1'; /** `val` is now of value `1` */
+
+
+/** De-referencing */
+let val = '10';
+let borrowVal = &val; /** `borrowVal` is just a reference to `val` */
+let derefBorrowVal = *borrowVal; /** De-ref borrowed `val` */
 ```
-
-1. Mutable
-   
-   ```rs
-   /** Mutable variable */
-   let mut mutableVar = '100';
-   mutableVar = '2';
-
-   /** Mutable variable is mutable by value, not by type */
-   let mut mutableVar = '100'; /** str */
-   mutableVar = 10; /** Compile error! */
-   ```
-
-2. Immutable
-
-    ```ts
-    /** All variables are immutable by default */
-    let immutableByDefault = '10'; /** immutable string */
-    immutableByDefault = '1'; /** Compile error! */
-    ```
-
-3. Reference or borrowing
-
-    ```rs
-    let val = '10';
-    let borrowVal = &val; /** &str */
-    let mut mutableBorrow = &mut val; /** &mut str */
-
-    borrowVal = '1'; /** Compile error! */
-    mutableBorrow = '1'; /** `val` is now of value `1` */
-    ```
-
-4. Dereferencing
-
-    ```rs
-    let val = '10';
-    let borrowVal = &val; /** `borrowVal` is just a reference to `val` */
-    let derefBorrowVal = *borrowVal; /** De-ref borrowed `val` */
-    ```
 
 ### Primitives
 
@@ -98,7 +114,13 @@ let definedType: str = '100';
 2. Objects
 
     ```ts
-    let object = { haha: 1, lol: 'haha' };
+    let object = { first: 1, second: '2' };
+
+    /** Computed properties */
+    let a = 'first';
+    let computed = {
+      [a]: 1,
+    };
     ```
 
 3. Strings
@@ -121,6 +143,7 @@ let definedType: str = '100';
     ```ts
     let integer: num = 1;
     let float: num = 1.1;
+    let numWithSeparators: num = 1_000_000;
     ```
 
 6. Options
@@ -213,6 +236,8 @@ for (let i in 0...2) {
     a * b
     a / b
     a % b
+    -a
+    a ** b
     ```
 
 2. Bitwise
@@ -236,19 +261,19 @@ for (let i in 0...2) {
     !a
     ```
 
-### Comparison
+4. Comparison
 
-```ts
-a == b
-a != b
-a > b
-a < b
-a >= b
-a <= b
-a is b
-is a
-not b
-```
+    ```ts
+    a == b
+    a != b
+    a > b
+    a < b
+    a >= b
+    a <= b
+    a is b
+    is a
+    not b
+    ```
 
 ### If-Else
 
@@ -275,12 +300,32 @@ let [a, b] = [1, '1'];
 let { a, b } = { a: 1, b: '1' };
 ```
 
+### Rest/ Spread
+
+```ts
+/** Array<num> */
+let a = [1, 2, 3, 4];
+let [b, ...c] = a;
+
+let d = [b, ...a];
+```
+
+```ts
+/** Object */
+let a = { b: 1, c: 2 };
+let { b, ...c } = a;
+
+let d = { ...a };
+```
+
 ### Try-Catch-Finally
 
 ```ts
 try {
   ...
 } catch (e is Option) {
+  ...
+} catch (e) {
   ...
 } finally {
   ...
@@ -290,21 +335,67 @@ try {
 ### Functions/ Closures
 
 ```ts
-fn a() {
-  ...
-}
+/** function declaration */
+fn a() { ... }
 
 async fn b() { ... }
 
 let a = () => { ... };
-let a = () => {
-  'a'
-};
+let a = () => { 'a' };
 
+
+/** Closure */
 let b = '1';
-let c = () => {
-  b
-};
+let c = () => { b };
+
+
+/** Positional parameters */
+fn a(b: num, c: str) { ... }
+fn(1, '2');
+
+
+/** Named parameters */
+fn a(b: num, c: str) { ... }
+a(c: '1', b: 2);
+
+
+/** Default parameters */
+fn a(b: num = 1) { ... }
+a();
+
+
+/** Optional parameters */
+fn a(b: num, c?: bool) { ... }
+a(1);
+
+
+/** Partial application */
+fn a(b: num, c?: bool) { ... }
+
+let partialA = a(?, true);
+
+partialA(1);
+
+
+/** Iterators */
+iter fn a() {
+  yield 1;
+}
+
+iter fn b(tasks: Iterable<num>) {
+  for (let i of tasks) {
+    yield i * 2;
+  }
+}
+
+/** Async iterators */
+async iter fn c(tasks: Iterable<num>) {
+  for (let i of tasks) {
+    let a = await doSomething(i);
+    yield a;
+    /** Alternatively, `yield await doSomething(i)` */
+  }
+}
 ```
 
 ### Futures
@@ -345,23 +436,30 @@ let c = () => {
     } while (true);
     ```
 
-### Iterators
+### Iterables
 
 ```ts
+/** Iterable<num> */
 let a = [1, 2, 3];
-for (let i of a) {
-  ...
-}
+for (let i of a) { ... }
 
+
+/** Iterable<Future<num>> */
 let a = [Future(1), Future(2), Future(true)];
-for await (let i of a) {
-  ...
-}
+for await (let i of a) { ... }
+
+
+/** w/ destructuring */
+let a = [
+  [1, 2],
+  [3, 4],
+];
+for (let [a, b] of a) { ... }
 ```
 
 ### Pattern Matching
 
-```ts
+```rs
 let a = Some(1);
 match (a) {
   Some(n) => { ... },
@@ -412,11 +510,12 @@ let c = match (b) {
     /** Exported fields and methods are public by default */
     fn a() { ... }
     fn b() { ... }
+    let c = 100;
 
-    export a, b;
+    export a, b, c;
     ```
 
-### Optional chaining
+### Optional chaining w/ Nullish Coalescing
 
 ```ts
 let a = {
@@ -429,6 +528,8 @@ let a = {
 
 a?.b?.c?.0
 a?.c?[0]?.['c']
+
+a?.b?.0 ?? 100 /** Fallback to `100` if `None` */
 ```
 
 ## Type Syntax
